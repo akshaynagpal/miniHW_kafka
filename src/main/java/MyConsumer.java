@@ -1,7 +1,3 @@
-/**
- * Created by akshay on 11/2/2016.
- */
-
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
@@ -18,15 +14,17 @@ public class MyConsumer {
     private final ConsumerConnector consumer;
     private final String topic;
 
-    public MyConsumer(String zookeeper, String groupId, String topic) {
-        Properties props = new Properties();
-        props.put("zookeeper.connect", zookeeper);
-        props.put("group.id", groupId);
-        props.put("zookeeper.session.timeout.ms", "500");
-        props.put("zookeeper.sync.time.ms", "250");
-        props.put("auto.commit.interval.ms", "1000");
+    public MyConsumer(String zookeeper, String topic) {
+        Properties properties = new Properties();
+        properties.put("zookeeper.connect", zookeeper);
+        properties.put("group.id", "twitter");
+        properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        properties.put("zookeeper.session.timeout.ms", "500");
+        properties.put("zookeeper.sync.time.ms", "250");
+        properties.put("auto.commit.interval.ms", "1000");
 
-        consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(props));
+        consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(properties));
         this.topic = topic;
     }
 
@@ -39,7 +37,7 @@ public class MyConsumer {
         for (final KafkaStream stream : streams) {
             ConsumerIterator<byte[], byte[]> it = stream.iterator();
             while (it.hasNext()) {
-                System.out.println("Message from Single Topic: " + new String(it.next().message()));
+                System.out.println("Tweet:" + new String(it.next().message()));
             }
         }
         if (consumer != null) {
@@ -48,8 +46,8 @@ public class MyConsumer {
     }
 
     public static void main(String[] args) {
-        String topic = args[0];
-        MyConsumer myConsumer = new MyConsumer("localhost:2181", "testgroup", topic);
+    	
+        MyConsumer myConsumer = new MyConsumer("localhost:2181", "tweet");
         myConsumer.testConsumer();
     }
 
